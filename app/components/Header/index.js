@@ -5,7 +5,7 @@ import A from './A';
 import Img from './Img';
 import NavBar from './NavBar';
 import HeaderLink from './HeaderLink';
-import Banner from './banner.jpg';
+import Banner from './logoWhite.svg';
 import messages from './messages';
 
 /* eslint-disable react/prefer-stateless-function */
@@ -13,8 +13,8 @@ class Header extends React.Component {
   render() {
     return (
       <div>
-        <A href="https://twitter.com/mxstbr">
-          <Img src={Banner} alt="react-boilerplate - Logo" />
+        <A href="https://bp-3.com">
+          <Img src={Banner} alt="BP3 - Logo" />
         </A>
         <NavBar>
           <HeaderLink to="/">
@@ -22,6 +22,9 @@ class Header extends React.Component {
           </HeaderLink>
           <HeaderLink to="/features">
             <FormattedMessage {...messages.features} />
+          </HeaderLink>
+          <HeaderLink to="/vision">
+            <FormattedMessage {...messages.vision} />
           </HeaderLink>
         </NavBar>
       </div>
