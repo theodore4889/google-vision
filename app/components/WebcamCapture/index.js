@@ -8,16 +8,18 @@
 
 import React from 'react';
 import Webcam from 'react-webcam';
+import PropTypes from 'prop-types';
 
 class WebcamCapture extends React.Component {
-  setRef = (webcam) => {
+  setRef = webcam => {
     this.webcam = webcam;
-  }
+  };
 
   capture = () => {
-    var imageSrc = this.webcam.getScreenshot();
-    imageSrc = imageSrc.substring(imageSrc.indexOf("base64,") + 7);
-    this.props.updateVisionReq(imageSrc);
+    let imageSrc = this.webcam.getScreenshot();
+    imageSrc = imageSrc.substring(imageSrc.indexOf('base64,') + 7);
+
+    this.props.onCapture(imageSrc, 'LABEL_DETECTION');
   };
 
   render() {
@@ -37,11 +39,17 @@ class WebcamCapture extends React.Component {
           width={350}
           videoConstraints={videoConstraints}
         />
-        <br/>
-        <button className="btn btn-default" onClick={this.capture}>Capture photo</button>
+        <br />
+        <button className="btn btn-default" onClick={this.capture}>
+          Capture Photo
+        </button>
       </div>
     );
   }
 }
+
+WebcamCapture.propTypes = {
+  onCapture: PropTypes.func,
+};
 
 export default WebcamCapture;
