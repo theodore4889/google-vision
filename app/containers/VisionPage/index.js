@@ -9,6 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import axios from 'axios';
 
 import H1 from 'components/H1';
+import Img from 'components/Img';
 import WebcamCapture from 'components/WebcamCapture';
 import VisionResponseList from 'components/VisionResponseList';
 
@@ -24,12 +25,14 @@ const API_KEY = 'AIzaSyAs_J7_OKhpcBOMoW8n1ZJyEW7gnJcPQXk';
 const DET_LABEL = 'LABEL_DETECTION';
 const DET_FACE = 'FACE_DETECTION';
 const DET_TEXT = 'TEXT_DETECTION';
+const DET_LOGO = 'LOGO_DETECTION';
 
 export default class VisionPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       visionArray: [],
+      imageSrc: null,
     };
 
     this.initItem = this.initItem.bind(this);
@@ -53,7 +56,7 @@ export default class VisionPage extends React.Component {
   }
 
   likelihoodToScore(likelihood) {
-    console.log('LIKELIHOOD', likelihood);
+    // console.log('LIKELIHOOD', likelihood);
     switch (likelihood) {
       case 'VERY_UNLIKELY':
         return 0.0;
@@ -71,24 +74,28 @@ export default class VisionPage extends React.Component {
   }
 
   buildVisionArray(response, detectType) {
-    console.log('detectType:', detectType, ', response:', response);
+    // console.log('detectType:', detectType, ', response:', response);
     let visionArray = [this.initItem(detectType, -1.0)];
 
-    if (detectType === DET_LABEL) {
-      visionArray = visionArray.concat(response.labelAnnotations);
-    } else if (detectType === DET_FACE) {
-      const annotation = response.faceAnnotations[0];
+    if (response && Object.keys(response).length !== 0) {
+      if (detectType === DET_LABEL) {
+        visionArray = visionArray.concat(response.labelAnnotations);
+      } else if (detectType === DET_FACE) {
+        const annotation = response.faceAnnotations[0];
 
-      visionArray = visionArray.concat([
-        this.initItem('Anger', annotation.angerLikelihood),
-        this.initItem('Joy', annotation.joyLikelihood),
-        this.initItem('Sorrow', annotation.sorrowLikelihood),
-        this.initItem('Surprise', annotation.surpriseLikelihood),
-      ]);
-    } else if (detectType === DET_TEXT) {
-      visionArray = visionArray.concat([
-        this.initItem(`TEXT: ${response.fullTextAnnotation.text}`, null),
-      ]);
+        visionArray = visionArray.concat([
+          this.initItem('Anger', annotation.angerLikelihood),
+          this.initItem('Joy', annotation.joyLikelihood),
+          this.initItem('Sorrow', annotation.sorrowLikelihood),
+          this.initItem('Surprise', annotation.surpriseLikelihood),
+        ]);
+      } else if (detectType === DET_TEXT) {
+        visionArray = visionArray.concat([
+          this.initItem(`TEXT: ${response.fullTextAnnotation.text}`, null),
+        ]);
+      } else if (detectType === DET_LOGO) {
+        visionArray = visionArray.concat(response.logoAnnotations);
+      }
     }
 
     return visionArray;
@@ -107,7 +114,10 @@ export default class VisionPage extends React.Component {
       case 'document':
       case 'paper':
       case 'ticket':
+      case 'font':
         return DET_TEXT;
+      case 'product':
+        return DET_LOGO;
       default:
         return null;
     }
@@ -137,14 +147,9 @@ export default class VisionPage extends React.Component {
           visionArray: this.state.visionArray.concat(visionArray),
         });
 
-        // const now = d.getTime();
-
         for (let i = 0; i < visionArray.length; i += 1) {
           const item = visionArray[i];
-          // visionArray[i].key = `${now}_${i}`;
-
           const newDetectType = this.evaluateItem(item);
-          // console.log("new type" , newDetectType);
 
           if (newDetectType) {
             this.queryVision(imageSrc, newDetectType);
@@ -160,6 +165,7 @@ export default class VisionPage extends React.Component {
   onCapture(imageSrc, detectType) {
     this.setState({
       visionArray: [],
+      imageSrc,
     });
 
     this.queryVision(imageSrc, detectType);
@@ -188,6 +194,8 @@ export default class VisionPage extends React.Component {
           <div className="row">
             <div className="col">
               <WebcamCapture onCapture={this.onCapture} />
+              <br />
+              <Img src={`data:image/png;base64, ${this.state.imageSrc}`} />
             </div>
             <div className="col">
               <VisionResponseList items={this.state.visionArray} />

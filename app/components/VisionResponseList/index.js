@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import VisionResponseItem from 'components/VisionResponseItem';
 
 const divStyle = {
-  height: '300px',
+  height: '500px',
   overflowY: 'scroll',
 };
 
