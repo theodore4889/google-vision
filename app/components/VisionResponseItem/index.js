@@ -5,28 +5,37 @@
  */
 
 import React from 'react';
-import ReactJson from 'react-json-view'
+import PropTypes from 'prop-types';
 
-import axios from 'axios'
+// class VisionResponseItem extends React.Component {
+function VisionResponseItem({ description, score }) {
+  // render() {
+  // const description = this.props.description;
+  // const score = this.props.score;
+  let color = '';
+  let visibility = '';
 
-const BASE_URL = "https://content-vision.googleapis.com";
-const API_KEY = "AIzaSyAs_J7_OKhpcBOMoW8n1ZJyEW7gnJcPQXk";
-
-class VideoResponseItem extends React.Component {
-  constructor(props){
-    console.log('[START] VisionResponseItem Constructor');
-    super(props);
-
-    console.log('[END] VisionResponseItem Constructor');
+  if (score < 0) {
+    color = 'list-group-item-dark';
+    visibility = 'invisible';
   }
 
-  render() {
-    return (
-      <div>
-        <ReactJson src={this.props.resp} />
-      </div>
-    );
-  }
+  return (
+    <li
+      className={`list-group-item ${color} d-flex justify-content-between align-items-center`}
+    >
+      {description}
+      <span className={`badge badge-primary badge-pill ${visibility}`}>
+        {Math.round(score * 100)}
+      </span>
+    </li>
+  );
+  // }
 }
 
-export default VideoResponseItem;
+VisionResponseItem.propTypes = {
+  description: PropTypes.string,
+  score: PropTypes.number,
+};
+
+export default VisionResponseItem;

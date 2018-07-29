@@ -23,6 +23,7 @@ const API_KEY = 'AIzaSyAs_J7_OKhpcBOMoW8n1ZJyEW7gnJcPQXk';
 
 const DET_LABEL = 'LABEL_DETECTION';
 const DET_FACE = 'FACE_DETECTION';
+const DET_TEXT = 'TEXT_DETECTION';
 
 export default class VisionPage extends React.Component {
   constructor(props) {
@@ -36,6 +37,7 @@ export default class VisionPage extends React.Component {
     this.buildVisionArray = this.buildVisionArray.bind(this);
     this.evaluateItem = this.evaluateItem.bind(this);
     this.queryVision = this.queryVision.bind(this);
+    this.onCapture = this.onCapture.bind(this);
   }
 
   /*
@@ -51,34 +53,42 @@ export default class VisionPage extends React.Component {
   }
 
   likelihoodToScore(likelihood) {
+    console.log('LIKELIHOOD', likelihood);
     switch (likelihood) {
       case 'VERY_UNLIKELY':
         return 0.0;
       case 'UNLIKELY':
         return 0.25;
+      case 'POSSIBLE':
+        return 0.5;
       case 'LIKELY':
         return 0.75;
       case 'VERY_LIKELY':
         return 1.0;
       default:
-        return 0.0;
+        return likelihood;
     }
   }
 
   buildVisionArray(response, detectType) {
-    let visionArray;
+    console.log('detectType:', detectType, ', response:', response);
+    let visionArray = [this.initItem(detectType, -1.0)];
 
     if (detectType === DET_LABEL) {
-      visionArray = response.labelAnnotations;
+      visionArray = visionArray.concat(response.labelAnnotations);
     } else if (detectType === DET_FACE) {
       const annotation = response.faceAnnotations[0];
 
-      visionArray = [
+      visionArray = visionArray.concat([
         this.initItem('Anger', annotation.angerLikelihood),
         this.initItem('Joy', annotation.joyLikelihood),
         this.initItem('Sorrow', annotation.sorrowLikelihood),
         this.initItem('Surprise', annotation.surpriseLikelihood),
-      ];
+      ]);
+    } else if (detectType === DET_TEXT) {
+      visionArray = visionArray.concat([
+        this.initItem(`TEXT: ${response.fullTextAnnotation.text}`, null),
+      ]);
     }
 
     return visionArray;
@@ -93,6 +103,11 @@ export default class VisionPage extends React.Component {
       case 'boy':
       case 'girl':
         return DET_FACE;
+      case 'text':
+      case 'document':
+      case 'paper':
+      case 'ticket':
+        return DET_TEXT;
       default:
         return null;
     }
@@ -142,6 +157,14 @@ export default class VisionPage extends React.Component {
       });
   }
 
+  onCapture(imageSrc, detectType) {
+    this.setState({
+      visionArray: [],
+    });
+
+    this.queryVision(imageSrc, detectType);
+  }
+
   /*
   shouldComponentUpdate() {
     return false;
@@ -161,8 +184,16 @@ export default class VisionPage extends React.Component {
         <H1>
           <FormattedMessage {...messages.header} />
         </H1>
-        <WebcamCapture onCapture={this.queryVision} />
-        <VisionResponseList items={this.state.visionArray} />
+        <div className="container">
+          <div className="row">
+            <div className="col">
+              <WebcamCapture onCapture={this.onCapture} />
+            </div>
+            <div className="col">
+              <VisionResponseList items={this.state.visionArray} />
+            </div>
+          </div>
+        </div>
         <br />
       </div>
     );

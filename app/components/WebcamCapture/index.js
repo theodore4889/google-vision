@@ -40,7 +40,11 @@ class WebcamCapture extends React.Component {
           videoConstraints={videoConstraints}
         />
         <br />
-        <button className="btn btn-default" onClick={this.capture}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={this.capture}
+        >
           Capture Photo
         </button>
       </div>
