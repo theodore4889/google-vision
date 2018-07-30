@@ -115,6 +115,10 @@ export default class VisionPage extends React.Component {
       case 'paper':
       case 'ticket':
       case 'font':
+      case 'identify document':
+      case "driver's license":
+      case 'payment card':
+      case 'credit card':
         return DET_TEXT;
       case 'product':
         return DET_LOGO;
@@ -138,24 +142,32 @@ export default class VisionPage extends React.Component {
       .then(res => {
         const response = res.data.responses[0];
         const visionArray = this.buildVisionArray(response, detectType);
-
+        let detectTypes = DET_LABEL;
         // console.log("res", res);
         // console.log("Response", response);
         // console.log("Vision Array", visionArray);
 
+        for (let i = 0; i < visionArray.length; i += 1) {
+          const item = visionArray[i];
+
+          // IF score === 0, remove item
+          if (item.score === 0) {
+            visionArray.splice(i, 1);
+            i -= 1;
+            // ELSE check for new detection types
+          } else {
+            const newDetectType = this.evaluateItem(item);
+
+            if (newDetectType && detectTypes.indexOf(newDetectType) === -1) {
+              this.queryVision(imageSrc, newDetectType);
+              detectTypes += `,${newDetectType}`;
+            }
+          }
+        }
+
         this.setState({
           visionArray: this.state.visionArray.concat(visionArray),
         });
-
-        for (let i = 0; i < visionArray.length; i += 1) {
-          const item = visionArray[i];
-          const newDetectType = this.evaluateItem(item);
-
-          if (newDetectType) {
-            this.queryVision(imageSrc, newDetectType);
-            break;
-          }
-        }
       })
       .then(() => {
         // callback();
@@ -195,7 +207,10 @@ export default class VisionPage extends React.Component {
             <div className="col">
               <WebcamCapture onCapture={this.onCapture} />
               <br />
-              <Img src={`data:image/png;base64, ${this.state.imageSrc}`} />
+              <Img
+                src={`data:image/png;base64, ${this.state.imageSrc}`}
+                alt=""
+              />
             </div>
             <div className="col">
               <VisionResponseList items={this.state.visionArray} />
