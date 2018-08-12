@@ -105,6 +105,7 @@ export default class VisionPage extends React.Component {
     switch (item.description) {
       case 'person':
       case 'human':
+      case 'selfie':
       case 'head':
       case 'face':
       case 'boy':
@@ -202,6 +203,9 @@ export default class VisionPage extends React.Component {
         <H1>
           <FormattedMessage {...messages.header} />
         </H1>
+        <FormattedMessage {...messages.instructions} />
+        <br />
+        <br />
         <div className="container">
           <div className="row">
             <div className="col">
